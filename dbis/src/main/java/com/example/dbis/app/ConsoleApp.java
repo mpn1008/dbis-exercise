@@ -16,45 +16,32 @@ public class ConsoleApp implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    Scanner scanner;
-    String command;
+
     while (true) {
-      if (System.console() == null) {
-        System.out.println("No console available. Running in non-interactive mode.");
-        // maybe run some automated commands instead?
-      } else {
-        scanner = new Scanner(System.in);
-        System.out.println("Enter command (save, list, exit): ");
-        command = scanner.nextLine();
-        // handle input
+      Scanner scanner = new Scanner(System.in);
+      System.out.println("Enter command (save, list, exit): ");
+      String command = scanner.nextLine();
 
-        switch (command) {
-          case "save" -> {
-            System.out.print("Enter name: ");
-            String name = scanner.nextLine();
-            System.out.print("Enter age: ");
-            System.out.println("Saved!");
-          }
-          case "list" -> {
-            estateService.findAllEstates().forEach(p ->
-                log.info("estateId={}", p.getEstateId())
-            );
-          }
-          case "exit" -> {
-            System.out.println("Goodbye!");
-            System.exit(0);
-          }
-          default -> System.out.println("Unknown command");
+      switch (command) {
+        case "save" -> {
+          System.out.print("Enter name: ");
+          String name = scanner.nextLine();
+          System.out.print("Enter age: ");
+          System.out.println("Saved!");
         }
+        case "list" -> {
+          var es = estateService.findAllEstates();
+          for (var estate : es) {
+            log.info("estateId={}, estateCity={}", estate.getEstateId(),
+                estate.getCity());
+          }
+        }
+        case "exit" -> {
+          System.out.println("Goodbye!");
+          System.exit(0);
+        }
+        default -> System.out.println("Unknown command");
       }
-
-
-//      if (scanner.hasNextLine()) {
-//        command = scanner.nextLine();
-//      } else {
-//        command = "default"; // fallback if no input
-//      }
-
     }
   }
 }
