@@ -8,30 +8,32 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Entity
+@Table(name = "apartment")
+@PrimaryKeyJoinColumn(name = "estate_id")
 @Getter
 @Setter
-@Table(name = "estate")
-@Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class Estate {
+
+public class Apartment extends Estate {
     @Id
     @Column(name = "estate_id")
     Integer estateId;
 
-    @Column(name = "city")
-    String city;
+    @Column(name = "floor")
+    Integer floor;
 
-    @Column(name = "postal_code")
-    String postal_code;
+    @Column(name = "rent")
+    Double rent;
 
-    @Column(name = "street")
-    String street;
+    @Column(name = "rooms")
+    Integer rooms;
 
-    @Column(name ="street_no")
-    String street_no;
+    @Column(name ="has_balcony")
+    Boolean has_balcony;
 
-    @Column(name ="area_sqm")
-    Double area_sqm;
+    @Column(name ="has_kitchen")
+    Boolean has_kitchen;
+
 }
