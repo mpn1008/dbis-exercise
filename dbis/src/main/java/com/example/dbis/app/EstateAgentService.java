@@ -1,5 +1,6 @@
 package com.example.dbis.app;
 
+import com.example.dbis.domain.model.Estate;
 import com.example.dbis.domain.model.EstateAgent;
 import com.example.dbis.infra.jpa.EstateAgentRepository;
 import jakarta.transaction.Transactional;
@@ -18,6 +19,10 @@ public class EstateAgentService {
 
   public void save(EstateAgent estateAgent) {
     estateAgentRepository.save(estateAgent);
+  }
+
+  public Optional<EstateAgent> findAgentById(Integer id) {
+    return estateAgentRepository.findById(id);
   }
 
   @Transactional
