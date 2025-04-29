@@ -17,27 +17,30 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class HouseService {
 
-    private final HouseRepository repository;
-    private final EstateAgentRepository estateAgentRepository;
+  private final HouseRepository repository;
+  private final EstateAgentRepository estateAgentRepository;
 
-    @Transactional
-    public boolean createNewHouse(CreateHouseRequest req) {
-        log.info("class=EstateAgentService, method=createNewHouse");
-        Optional<EstateAgent> agent = estateAgentRepository.findById(req.getAgentId());
-        if (agent.isPresent()) {
-            repository.save(House.builder()
-                    .agent(agent.get())
-                    .city(req.getCity())
-                    .floors(req.getFloor())
-                    .area_sqm(req.getAreaSqm())
-                    .estateId(req.getEstateId())
-                    .postal_code(req.getPostalCode())
-                    .street(req.getStreet())
-                    .street_no(req.getStreetNo())
-                    .build());
-            return true;
-        }
-        return false;
+  @Transactional
+  public boolean createNewHouse(CreateHouseRequest req) {
+    log.info("class=EstateAgentService, method=createNewHouse, req={}", req);
+    Optional<EstateAgent> agent = estateAgentRepository.findById(req.getAgentId());
+    if (agent.isPresent()) {
+      repository.save(House.builder()
+          .agent(agent.get())
+          .city(req.getCity())
+          .floors(req.getFloor())
+          .area_sqm(req.getAreaSqm())
+          .estateId(req.getEstateId())
+          .postal_code(req.getPostalCode())
+          .street(req.getStreet())
+          .price(req.getPrice())
+          .street_no(req.getStreetNo())
+          .has_garden(req.getHasGarden())
+          .build());
+      return true;
     }
+    log.info("method=createNewHouse, agent={}, agent is null", req.getAgentId());
+    return false;
+  }
 }
 

@@ -1,6 +1,11 @@
 package com.example.dbis.app;
 
-import com.example.dbis.domain.model.*;
+import com.example.dbis.domain.model.Apartment;
+import com.example.dbis.domain.model.EstateAgent;
+import com.example.dbis.domain.model.House;
+import com.example.dbis.domain.model.Person;
+import com.example.dbis.domain.model.PurchaseContract;
+import com.example.dbis.domain.model.TenancyContract;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -25,6 +30,84 @@ public class ConsoleApp implements CommandLineRunner {
 
   private int randomId() {
     return random.nextInt(10000000);
+  }
+
+  protected void signContract(Scanner scanner) {
+    System.out.print("Is this a Tenancy Contract or Purchase Contract? (T = Tenancy, P = Purchase): ");
+    var type = scanner.nextLine().trim();
+
+    System.out.println("Enter the person ID:");
+    var personId = scanner.nextInt();
+    scanner.nextLine();
+
+    System.out.println("Enter the estate ID:");
+    var estateId = scanner.nextInt();
+    scanner.nextLine();
+
+    System.out.println("Enter contract date (YYYY-MM-DD):");
+    var contractDate = scanner.nextLine().trim();
+
+    System.out.println("Enter place:");
+    var place = scanner.nextLine().trim();
+
+    if (type.equalsIgnoreCase("T")) {
+      System.out.println("Enter start date (YYYY-MM-DD):");
+      var startDate = scanner.nextLine().trim();
+
+      System.out.println("Enter duration in months:");
+      var durationMonths = scanner.nextInt();
+      scanner.nextLine();
+
+      System.out.println("Enter extra costs:");
+      var extraCosts = scanner.nextDouble();
+      scanner.nextLine();
+
+      TenancyContract tenancyContract = TenancyContract.builder()
+          .contractNo(randomId())
+          .contractDate(LocalDate.parse(contractDate))
+          .place(place)
+          .personId(personId)
+          .estateId(estateId)
+          .startDate(LocalDate.parse(startDate))
+          .durationMonths(durationMonths)
+          .extraCosts(extraCosts)
+          .build();
+      try {
+        contractService.saveTenancy(tenancyContract);
+        System.out.println("Tenancy Contract signed with Contract No " + tenancyContract.getContractNo());
+
+      } catch (Exception e) {
+        System.out.println("Error saving tenancy, Make sure you have correct person id and estate id");
+      }
+
+    } else if (type.equalsIgnoreCase("P")) {
+      System.out.println("Enter number of installments:");
+      var installments = scanner.nextInt();
+      scanner.nextLine();
+
+      System.out.println("Enter interest rate:");
+      var interestRate = scanner.nextDouble();
+      scanner.nextLine();
+
+      PurchaseContract purchaseContract = PurchaseContract.builder()
+          .contractNo(randomId())
+          .contractDate(LocalDate.parse(contractDate))
+          .place(place)
+          .personId(personId)
+          .estateId(estateId)
+          .installments(installments)
+          .interestRate(interestRate)
+          .build();
+
+      try {
+        contractService.savePurchase(purchaseContract);
+        System.out.println("Purchase Contract signed with Contract No " + purchaseContract.getContractNo());
+      } catch (Exception e) {
+        System.out.println("Error saving purchase, Make sure you have correct person id");
+      }
+    } else {
+      System.out.println("Unknown contract type. Operation canceled.");
+    }
   }
 
   private void cmdExec(Scanner sc) {
@@ -199,12 +282,8 @@ public class ConsoleApp implements CommandLineRunner {
           var street = scanner.nextLine();
 
           System.out.println("Enter the estate agent id:");
-          var agentId = scanner.nextInt();
+          Integer agentId = scanner.nextInt();
           scanner.nextLine();
-          if (estateAgentService.findAgentById(agentId).isEmpty()) {
-            System.out.println(" Agent with id=" + agentId + " does not exist. Back to main menu.");
-            return;
-          }
 
           System.out.println("Enter the street number:");
           var streetNo = scanner.nextLine();
@@ -273,6 +352,7 @@ public class ConsoleApp implements CommandLineRunner {
                 .postalCode(postalCode)
                 .street(street)
                 .streetNo(streetNo)
+                .agentId(agentId)
                 .areaSqm(areaSqm)
                 // subclass fields:
                 .floor(floors)
@@ -280,7 +360,7 @@ public class ConsoleApp implements CommandLineRunner {
                 .hasGarden(hasGarden)
                 .build();
 
-            if(houseService.createNewHouse(house)) {
+            if (houseService.createNewHouse(house)) {
               System.out.println("House created with ID " + house.getEstateId());
             } else {
               System.out.println("House could not be created!");
@@ -318,23 +398,31 @@ public class ConsoleApp implements CommandLineRunner {
 
           System.out.printf("Current city is \"%s\". Enter new city (leave blank to keep):%n", estate.getCity());
           String newcity = scanner.nextLine().trim();
-          if (!newcity.isBlank()) {estate.setCity(newcity);}
+          if (!newcity.isBlank()) {
+            estate.setCity(newcity);
+          }
 
           System.out.printf("Current postal code is \"%s\". Enter new postal code (leave blank to keep):%n", estate.getPostal_code());
           String newpostalcode = scanner.nextLine().trim();
-          if (!newpostalcode.isBlank()) {estate.setPostal_code(newpostalcode);}
+          if (!newpostalcode.isBlank()) {
+            estate.setPostal_code(newpostalcode);
+          }
 
           System.out.printf("Current street is \"%s\". Enter new street (leave blank to keep):%n", estate.getStreet());
-          String newstreet = scanner.nextLine().trim();
-          if (!newstreet.isBlank()) {estate.setStreet(newstreet);}
+          var newstreet = scanner.nextLine().trim();
+          if (!newstreet.isBlank()) {
+            estate.setStreet(newstreet);
+          }
 
           System.out.printf("Current street number is \"%s\". Enter new street number (leave blank to keep):%n", estate.getStreet_no());
-          String newstreetno = scanner.nextLine().trim();
-          if (!newstreetno.isBlank()) {estate.setStreet_no(newstreetno);}
+          var newstreetno = scanner.nextLine().trim();
+          if (!newstreetno.isBlank()) {
+            estate.setStreet_no(newstreetno);
+          }
 
           System.out.printf("Current area is %.2f sqm. Enter new area (leave blank to keep):%n",
-                  estate.getArea_sqm());
-          String newsqm = scanner.nextLine().trim();
+              estate.getArea_sqm());
+          var newsqm = scanner.nextLine().trim();
           if (!newsqm.isBlank()) {
             try {
               estate.setArea_sqm(Double.parseDouble(newsqm));
@@ -375,7 +463,7 @@ public class ConsoleApp implements CommandLineRunner {
             }
 
             System.out.printf("Has balcony? (currently %s) Enter yes/no (leave blank to keep):%n",
-                    apartment.getHas_balcony() ? "yes" : "no");
+                apartment.getHas_balcony() ? "yes" : "no");
             String newBalcony = scanner.nextLine().trim();
             if (newBalcony.equalsIgnoreCase("yes")) {
               apartment.setHas_balcony(true);
@@ -384,7 +472,7 @@ public class ConsoleApp implements CommandLineRunner {
             }
 
             System.out.printf("Has kitchen? (currently %s) Enter yes/no (leave blank to keep):%n",
-                    apartment.getHas_kitchen() ? "yes" : "no");
+                apartment.getHas_kitchen() ? "yes" : "no");
             String newKitchen = scanner.nextLine().trim();
             if (newKitchen.equalsIgnoreCase("yes")) {
               apartment.setHas_kitchen(true);
@@ -417,7 +505,7 @@ public class ConsoleApp implements CommandLineRunner {
             }
 
             System.out.printf("Has garden? (currently %s) Enter yes/no (leave blank to keep):%n",
-                    house.getHas_garden() ? "yes" : "no");
+                house.getHas_garden() ? "yes" : "no");
             String newGarden = scanner.nextLine().trim();
             if (newGarden.equalsIgnoreCase("yes")) {
               house.setHas_garden(true);
@@ -472,94 +560,7 @@ public class ConsoleApp implements CommandLineRunner {
           System.out.println("Person created with ID " + person.getPersonId());
         }
         case "2" -> {
-          System.out.print("Is this a Tenancy Contract or Purchase Contract? (T = Tenancy, P = Purchase): ");
-          var type = scanner.nextLine().trim();
-
-          System.out.println("Enter the person ID:");
-          var personId = scanner.nextInt();
-          scanner.nextLine();
-
-          var personOptional = contractService.findPersonById(personId);
-          if (personOptional.isEmpty()) {
-            System.out.println("Person not found!");
-            return;
-          }
-
-          System.out.println("Enter the estate ID:");
-          var estateId = scanner.nextInt();
-          scanner.nextLine();
-
-          var estateOptional = estateService.findEstateById(estateId);
-          if (estateOptional.isEmpty()) {
-            System.out.println("Estate not found!");
-            return;
-          }
-
-          System.out.println("Enter the agent ID:");
-          var agentId = scanner.nextInt();
-          scanner.nextLine();
-
-          var agentOptional = estateAgentService.findAgentById(agentId);
-          if (agentOptional.isEmpty()) {
-            System.out.println("Agent not found!");
-            return;
-          }
-
-          System.out.println("Enter contract date (YYYY-MM-DD):");
-          var contractDate = scanner.nextLine().trim();
-
-          System.out.println("Enter place:");
-          var place = scanner.nextLine().trim();
-
-          if (type.equalsIgnoreCase("T")) {
-            System.out.println("Enter start date (YYYY-MM-DD):");
-            var startDate = scanner.nextLine().trim();
-
-            System.out.println("Enter duration in months:");
-            var durationMonths = scanner.nextInt();
-            scanner.nextLine();
-
-            System.out.println("Enter extra costs:");
-            var extraCosts = scanner.nextDouble();
-            scanner.nextLine();
-
-            TenancyContract tenancyContract = TenancyContract.builder()
-                .contractNo(randomId())
-                .contractDate(LocalDate.parse(contractDate))
-                .place(place)
-                .personId(personId)
-                .estateId(estateId)
-                .startDate(LocalDate.parse(startDate))
-                .durationMonths(durationMonths)
-                .extraCosts(extraCosts)
-                .build();
-
-            contractService.saveTenancy(tenancyContract);
-            System.out.println("Tenancy Contract signed with Contract No " + tenancyContract.getContractNo());
-          } else if (type.equalsIgnoreCase("P")) {
-            System.out.println("Enter number of installments:");
-            var installments = scanner.nextInt();
-            scanner.nextLine();
-
-            System.out.println("Enter interest rate:");
-            var interestRate = scanner.nextDouble();
-            scanner.nextLine();
-
-            PurchaseContract purchaseContract = PurchaseContract.builder()
-                .contractNo(randomId())
-                .contractDate(LocalDate.parse(contractDate))
-                .place(place)
-                .personId(personId)
-                .estateId(estateId)
-                .installments(installments)
-                .interestRate(interestRate)
-                .build();
-
-            contractService.savePurchase(purchaseContract);
-            System.out.println("Purchase Contract signed with Contract No " + purchaseContract.getContractNo());
-          } else {
-            System.out.println("Unknown contract type. Operation canceled.");
-          }
+          signContract(scanner);
         }
         case "3" -> {
           var contracts = contractService.findAllContracts();
