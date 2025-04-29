@@ -34,24 +34,6 @@ public class EstateService {
     return estateRepository.findById(id);
   }
 
-  public boolean createNewHouse(CreateHouseRequest req) {
-    log.info("method=createNewHouse, req={}", req);
-    Optional<EstateAgent> agent = estateAgentRepository.findById(req.getAgentId());
-    if (agent.isPresent()) {
-      houseRepository.save(House.builder()
-          .agent(agent.get())
-          .city(req.getCity())
-          .floors(req.getFloor())
-          .area_sqm(req.getAreaSqm())
-          .estateId(req.getEstateId())
-          .postal_code(req.getPostalCode())
-          .street(req.getStreet())
-          .street_no(req.getStreetNo())
-          .build());
-      return true;
-    }
-    return false;
-  }
 
   public void saveApartment(Apartment apartment) {
     //log.info("class=EstateService, method=save, estate={}", apartment);

@@ -59,8 +59,20 @@ CREATE TABLE contract (
                           contract_no   SERIAL PRIMARY KEY,
                           contract_date DATE    NOT NULL,
                           place         VARCHAR(100) NOT NULL,
-                          person_id     INT     REFERENCES person(person_id) ,
-                          estate_id     INT     REFERENCES estate(estate_id)
+
+                          person_id INT NOT NULL,
+
+                          CONSTRAINT fk_person
+                              FOREIGN KEY (person_id)
+                                  REFERENCES person(person_id)
+                                  ON DELETE RESTRICT,
+
+                         estate_id INT NOT NULL,
+
+                          CONSTRAINT fk_estate
+                              FOREIGN KEY (estate_id)
+                                  REFERENCES estate(estate_id)
+                                  ON DELETE RESTRICT
 );
 
 -- 7) Tenancy Contract
@@ -84,7 +96,7 @@ CREATE TABLE purchase_contract (
 
 -- 1) Insert an agent
 INSERT INTO estate_agent (name, address, login, password)
-VALUES ('Tom','Hamburg','liming','secret123');
+VALUES ('Tom','Hamburg','Tom1','123abc');
 
 -- 2) Insert two Estates and make subtable data separately
 INSERT INTO estate (city, postal_code, street, street_no, area_sqm, agent_id)
