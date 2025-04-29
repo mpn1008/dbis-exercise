@@ -40,6 +40,7 @@ public class ApartmentService {
           .build());
       return true;
     }
+    log.info("class=EstateAgentService, method=createNewApartment, agentId={}, agent is null", req.agentId);
     return false;
   }
 }

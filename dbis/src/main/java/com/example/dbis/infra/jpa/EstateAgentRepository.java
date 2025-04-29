@@ -7,5 +7,4 @@ import java.util.Optional;
 
 public interface EstateAgentRepository extends JpaRepository<EstateAgent, Integer> {
   Optional<EstateAgent> findByLoginAndPassword(String login, String password);
-
 }
