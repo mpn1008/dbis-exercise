@@ -223,23 +223,6 @@ public class ConsoleApp implements CommandLineRunner {
             System.out.println("Built-in kitchen?(yes/no):");
             var haskitchen = scanner.nextLine().trim().equalsIgnoreCase("yes");
 
-            Apartment apt = Apartment.builder()
-                // base class fields:
-                .estateId(randomId())
-                .city(city)
-                .postal_code(postalCode)
-                .street(street)
-                .street_no(streetNo)
-                .area_sqm(areaSqm)
-                // subclass fields:
-                .floor(floor)
-                .rent(rent)
-                .rooms(rooms)
-                .has_balcony(hasbalcony)
-                .has_kitchen(haskitchen)
-                .build();
-
-            estateService.saveApartment(apt);
             var req = CreateApartmentRequest.builder()
                 .estateId(randomId())
                 .city(city)
@@ -274,24 +257,25 @@ public class ConsoleApp implements CommandLineRunner {
             System.out.print("Garden? (yes/no): ");
             boolean hasGarden = scanner.nextLine().trim().equalsIgnoreCase("yes");
 
-            House house = House.builder()
+            CreateHouseRequest house = CreateHouseRequest.builder()
                 // base class fields:
                 .estateId(randomId())
                 .city(city)
-                .postal_code(postalCode)
+                .postalCode(postalCode)
                 .street(street)
-                .street_no(streetNo)
-                .area_sqm(areaSqm)
+                .streetNo(streetNo)
+                .areaSqm(areaSqm)
                 // subclass fields:
-                .floors(floors)
+                .floor(floors)
                 .price(price)
-                .has_garden(hasGarden)
-
+                .hasGarden(hasGarden)
                 .build();
 
-
-            estateService.saveHouse(house);
-            System.out.println("House created with ID " + house.getEstateId());
+            if(estateService.createNewHouse(house)) {
+              System.out.println("House created with ID " + house.getEstateId());
+            } else {
+              System.out.println("House could not be created!");
+            }
           } else {
             System.out.println("Unknown type, returning to menu.");
           }
