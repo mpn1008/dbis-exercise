@@ -32,7 +32,7 @@ public class EstateAgentService {
 
     if (agent.isPresent()) {
       var a = agent.get();
-      a.setAddress(estateAgent.getAddress().isBlank() ? a.getAddress() : estateAgent.getAddress());
+      a.setAddress(estateAgent.getAddress().isBlank() && estateAgent.getAddress().isEmpty() ? a.getAddress() : estateAgent.getAddress());
 
       a.setName(estateAgent.getName().isBlank() ? a.getName() : estateAgent.getName());
 

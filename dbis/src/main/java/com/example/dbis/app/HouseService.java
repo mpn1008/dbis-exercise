@@ -1,8 +1,9 @@
 package com.example.dbis.app;
 
-import com.example.dbis.domain.model.Apartment;
+
 import com.example.dbis.domain.model.EstateAgent;
-import com.example.dbis.infra.jpa.ApartmentRepository;
+import com.example.dbis.domain.model.House;
+import com.example.dbis.infra.jpa.HouseRepository;
 import com.example.dbis.infra.jpa.EstateAgentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,33 +15,32 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ApartmentService {
+public class HouseService {
 
-  private final ApartmentRepository repository;
+  private final HouseRepository repository;
   private final EstateAgentRepository estateAgentRepository;
 
   @Transactional
-  public boolean createNewApartment(CreateApartmentRequest req) {
-    log.info("class=EstateAgentService, method=createNewApartment");
+  public boolean createNewHouse(CreateHouseRequest req) {
+    log.info("class=EstateAgentService, method=createNewHouse, req={}", req);
     Optional<EstateAgent> agent = estateAgentRepository.findById(req.getAgentId());
     if (agent.isPresent()) {
-      repository.save(Apartment.builder()
+      repository.save(House.builder()
           .agent(agent.get())
           .city(req.getCity())
-          .floor(req.getFloor())
+          .floors(req.getFloor())
           .area_sqm(req.getAreaSqm())
-          .rent(req.getRent())
-          .rooms(req.getRooms())
           .estateId(req.getEstateId())
           .postal_code(req.getPostalCode())
           .street(req.getStreet())
-          .has_balcony(req.getHasBalcony())
-          .has_kitchen(req.getHasKitchen())
+          .price(req.getPrice())
           .street_no(req.getStreetNo())
+          .has_garden(req.getHasGarden())
           .build());
       return true;
     }
-    log.info("class=EstateAgentService, method=createNewApartment, agentId={}, agent is null", req.agentId);
+    log.info("method=createNewHouse, agent={}, agent is null", req.getAgentId());
     return false;
   }
 }
+
