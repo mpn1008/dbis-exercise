@@ -1,5 +1,6 @@
 package com.example.dbis.app;
 
+import com.example.dbis.domain.model.Estate;
 import com.example.dbis.domain.model.EstateAgent;
 import com.example.dbis.infra.jpa.EstateAgentRepository;
 import jakarta.transaction.Transactional;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,6 +20,10 @@ public class EstateAgentService {
 
   public void save(EstateAgent estateAgent) {
     estateAgentRepository.save(estateAgent);
+  }
+
+  public Optional<EstateAgent> findAgentById(Integer id) {
+    return estateAgentRepository.findById(id);
   }
 
   @Transactional
@@ -39,6 +45,9 @@ public class EstateAgentService {
     return false;
   }
 
+  public List<EstateAgent> findAll() {
+    return estateAgentRepository.findAll();
+  }
   public Optional<EstateAgent> findByLoginAndPassword(String login, String password) {
     log.info("class=EstateAgentService, method=findByLoginAndPassword, login={}, password={}", login, password);
     return estateAgentRepository.findByLoginAndPassword(login, password);
