@@ -19,6 +19,7 @@ public class ConsoleApp implements CommandLineRunner {
   private final EstateService estateService;
   private final EstateAgentService estateAgentService;
   private final ContractService contractService;
+  private final ApartmentService apartmentService;
   private static final Random random = new Random();
 
   private int randomId() {
@@ -36,16 +37,16 @@ public class ConsoleApp implements CommandLineRunner {
       System.out.print("Select an option: ");
       var input = sc.nextLine();
 
-        switch (input) {
-            case "1" -> agentAccountAdministration(sc);
-            case "2" -> estateManagement(sc);
-            case "3" -> contractManagement(sc);
-            case "0" -> {
-              System.out.println("Exiting");
-              System.exit(0);
-            }
-            default -> System.out.println("Invalid choice, try again.");
+      switch (input) {
+        case "1" -> agentAccountAdministration(sc);
+        case "2" -> estateManagement(sc);
+        case "3" -> contractManagement(sc);
+        case "0" -> {
+          System.out.println("Exiting");
+          System.exit(0);
         }
+        default -> System.out.println("Invalid choice, try again.");
+      }
     }
   }
 
@@ -129,17 +130,18 @@ public class ConsoleApp implements CommandLineRunner {
             .password(pass)
             .build();
 
-        if(estateAgentService.update(id, acc)) {
+        if (estateAgentService.update(id, acc)) {
           System.out.println("Account has been updated!");
-        }
-        else {
+        } else {
           System.out.println("Can't find account!");
         }
       }
 
-      case "0" -> { return; }
+      case "0" -> {
+        return;
       }
     }
+  }
 
   // Estate Management (agent must log in)
   private void estateManagement(Scanner scanner) {
@@ -160,7 +162,7 @@ public class ConsoleApp implements CommandLineRunner {
     System.out.println("Welcome, " + currentAgent.getName() + "!");
 
     while (true) {
-      System.out.println("\n--- ESTATE MANAGEMENT (Agent: "  + currentAgent.getName() + ") ---");
+      System.out.println("\n--- ESTATE MANAGEMENT (Agent: " + currentAgent.getName() + ") ---");
       System.out.println("1. List all estates");
       System.out.println("2. Create new estate");
       System.out.println("3. Delete an estate");
@@ -171,9 +173,10 @@ public class ConsoleApp implements CommandLineRunner {
       switch (scanner.nextLine().trim()) {
         case "1" -> {
           var es = estateService.findAllEstates();
+          log.info("Found {} estates!", es.size());
           for (var estate : es) {
             log.info("estateId={}, estateCity={}", estate.getEstateId(),
-                    estate.getCity());
+                estate.getCity());
           }
         }
         case "2" -> {
@@ -188,6 +191,10 @@ public class ConsoleApp implements CommandLineRunner {
 
           System.out.println("Enter the street:");
           var street = scanner.nextLine();
+
+          System.out.println("Enter the estate agent id:");
+          var agentId = scanner.nextInt();
+          scanner.nextLine();
 
           System.out.println("Enter the street number:");
           var streetNo = scanner.nextLine();
@@ -217,25 +224,44 @@ public class ConsoleApp implements CommandLineRunner {
             var haskitchen = scanner.nextLine().trim().equalsIgnoreCase("yes");
 
             Apartment apt = Apartment.builder()
-                    // base class fields:
-                    .estateId(randomId())
-                    .city(city)
-                    .postal_code(postalCode)
-                    .street(street)
-                    .street_no(streetNo)
-                    .area_sqm(areaSqm)
-                    // subclass fields:
-                    .floor(floor)
-                    .rent(rent)
-                    .rooms(rooms)
-                    .has_balcony(hasbalcony)
-                    .has_kitchen(haskitchen)
-                    .build();
+                // base class fields:
+                .estateId(randomId())
+                .city(city)
+                .postal_code(postalCode)
+                .street(street)
+                .street_no(streetNo)
+                .area_sqm(areaSqm)
+                // subclass fields:
+                .floor(floor)
+                .rent(rent)
+                .rooms(rooms)
+                .has_balcony(hasbalcony)
+                .has_kitchen(haskitchen)
+                .build();
 
             estateService.saveApartment(apt);
-            System.out.println("Apartment created with ID " + apt.getEstateId());
+            var req = CreateApartmentRequest.builder()
+                .estateId(randomId())
+                .city(city)
+                .postalCode(postalCode)
+                .street(street)
+                .streetNo(streetNo)
+                .areaSqm(areaSqm)
+                .agentId(agentId)
+                .floor(floor)
+                .rent(rent)
+                .rooms(rooms)
+                .hasBalcony(hasbalcony)
+                .hasKitchen(haskitchen)
+                .build();
 
-          }else if (type.equalsIgnoreCase("B")) {
+            if (apartmentService.createNewApartment(req)) {
+              System.out.println("Apartment created with ID " + req.getEstateId());
+            } else {
+              System.out.println("Apartment could not be created!");
+            }
+
+          } else if (type.equalsIgnoreCase("B")) {
 
             System.out.print("Number of floors: ");
             int floors = scanner.nextInt();
@@ -249,19 +275,19 @@ public class ConsoleApp implements CommandLineRunner {
             boolean hasGarden = scanner.nextLine().trim().equalsIgnoreCase("yes");
 
             House house = House.builder()
-                    // base class fields:
-                    .estateId(randomId())
-                    .city(city)
-                    .postal_code(postalCode)
-                    .street(street)
-                    .street_no(streetNo)
-                    .area_sqm(areaSqm)
-                    // subclass fields:
-                    .floors(floors)
-                    .price(price)
-                    .has_garden(hasGarden)
+                // base class fields:
+                .estateId(randomId())
+                .city(city)
+                .postal_code(postalCode)
+                .street(street)
+                .street_no(streetNo)
+                .area_sqm(areaSqm)
+                // subclass fields:
+                .floors(floors)
+                .price(price)
+                .has_garden(hasGarden)
 
-                    .build();
+                .build();
 
 
             estateService.saveHouse(house);
@@ -368,7 +394,9 @@ public class ConsoleApp implements CommandLineRunner {
             System.out.println("Unknown estate type. Update canceled.");
           }
         }
-        case "0" -> { return; }
+        case "0" -> {
+          return;
+        }
         default -> System.out.println("Invalid choice.");
       }
     }
@@ -397,11 +425,11 @@ public class ConsoleApp implements CommandLineRunner {
           var address = scanner.nextLine().trim();
 
           var person = Person.builder()
-                  .personId(randomId())
-                  .first_name(firstName)
-                  .last_name(lastName)
-                  .address(address)
-                  .build();
+              .personId(randomId())
+              .first_name(firstName)
+              .last_name(lastName)
+              .address(address)
+              .build();
 
           contractService.save(person);
           System.out.println("Person created with ID " + person.getPersonId());
@@ -459,21 +487,19 @@ public class ConsoleApp implements CommandLineRunner {
             scanner.nextLine();
 
             TenancyContract tenancyContract = TenancyContract.builder()
-                    .contractNo(randomId())
-                    .contractDate(LocalDate.parse(contractDate))
-                    .place(place)
-                    .personId(personId)
-                    .estateId(estateId)
-                    .agentId(agentId)
-                    .startDate(LocalDate.parse(startDate))
-                    .durationMonths(durationMonths)
-                    .extraCosts(extraCosts)
-                    .build();
+                .contractNo(randomId())
+                .contractDate(LocalDate.parse(contractDate))
+                .place(place)
+                .personId(personId)
+                .estateId(estateId)
+                .startDate(LocalDate.parse(startDate))
+                .durationMonths(durationMonths)
+                .extraCosts(extraCosts)
+                .build();
 
             contractService.saveTenancy(tenancyContract);
             System.out.println("Tenancy Contract signed with Contract No " + tenancyContract.getContractNo());
-          }
-          else if (type.equalsIgnoreCase("P")) {
+          } else if (type.equalsIgnoreCase("P")) {
             System.out.println("Enter number of installments:");
             var installments = scanner.nextInt();
             scanner.nextLine();
@@ -483,15 +509,14 @@ public class ConsoleApp implements CommandLineRunner {
             scanner.nextLine();
 
             PurchaseContract purchaseContract = PurchaseContract.builder()
-                    .contractNo(randomId())
-                    .contractDate(LocalDate.parse(contractDate))
-                    .place(place)
-                    .personId(personId)
-                    .estateId(estateId)
-                    .agentId(agentId)
-                    .installments(installments)
-                    .interestRate(interestRate)
-                    .build();
+                .contractNo(randomId())
+                .contractDate(LocalDate.parse(contractDate))
+                .place(place)
+                .personId(personId)
+                .estateId(estateId)
+                .installments(installments)
+                .interestRate(interestRate)
+                .build();
 
             contractService.savePurchase(purchaseContract);
             System.out.println("Purchase Contract signed with Contract No " + purchaseContract.getContractNo());
@@ -503,14 +528,15 @@ public class ConsoleApp implements CommandLineRunner {
           var contracts = contractService.findAllContracts();
           for (var contract : contracts) {
             System.out.println("Contract No: " + contract.getContractNo() +
-                    ", Date: " + contract.getContractDate() +
-                    ", Place: " + contract.getPlace() +
-                    ", Person ID: " + contract.getPersonId() +
-                    ", Estate ID: " + contract.getEstateId() +
-                    ", Agent ID: " + contract.getAgentId());
+                ", Date: " + contract.getContractDate() +
+                ", Place: " + contract.getPlace() +
+                ", Person ID: " + contract.getPersonId() +
+                ", Estate ID: " + contract.getEstateId());
           }
         }
-        case "0" -> { return; }
+        case "0" -> {
+          return;
+        }
         default -> System.out.println("Invalid choice.");
       }
     }
@@ -524,16 +550,6 @@ public class ConsoleApp implements CommandLineRunner {
     cmdExec(scanner);
   }
 }
-
-
-
-
-
-
-
-
-
-
 
 
 //    System.out.print("Username: ");
@@ -551,7 +567,6 @@ public class ConsoleApp implements CommandLineRunner {
 //      System.out.println("Invalid credentials. Exiting.");
 //      System.exit(1);
 //    }
-
 
 
 

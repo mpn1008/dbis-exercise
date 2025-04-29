@@ -35,7 +35,4 @@ public class Contract {
     @Column(name = "estate_id")
     Integer estateId;
 
-    @Column(name = "agent_id")
-    Integer agentId;
-
 }

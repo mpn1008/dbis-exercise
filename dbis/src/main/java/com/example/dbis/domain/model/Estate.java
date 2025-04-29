@@ -34,4 +34,8 @@ public class Estate {
 
     @Column(name ="area_sqm")
     Double area_sqm;
+
+    @ManyToOne(optional = false) 
+    @JoinColumn(name = "agent_id", nullable = false)
+    private EstateAgent agent;
 }

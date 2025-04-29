@@ -10,12 +10,19 @@ CREATE TABLE estate_agent (
 -- 1)  Estate
 CREATE TABLE estate (
                         estate_id   SERIAL PRIMARY KEY,
-                        agent_id    INT  REFERENCES estate_agent(agent_id),
+
                         city        VARCHAR(100) NOT NULL,
                         postal_code VARCHAR(20)  NOT NULL,
                         street      VARCHAR(200) NOT NULL,
                         street_no   VARCHAR(20)  NOT NULL,
-                        area_sqm    NUMERIC(7,2)  NOT NULL
+                        area_sqm    NUMERIC(7,2)  NOT NULL,
+
+                        agent_id INT NOT NULL,
+
+                        CONSTRAINT fk_estate_agent
+                            FOREIGN KEY (agent_id)
+                            REFERENCES estate_agent(agent_id)
+                            ON DELETE RESTRICT
 );
 
 -- 2) Apartment
@@ -53,8 +60,7 @@ CREATE TABLE contract (
                           contract_date DATE    NOT NULL,
                           place         VARCHAR(100) NOT NULL,
                           person_id     INT     REFERENCES person(person_id) ,
-                          estate_id     INT     REFERENCES estate(estate_id),
-                          agent_id      INT     REFERENCES estate_agent(agent_id)
+                          estate_id     INT     REFERENCES estate(estate_id)
 );
 
 -- 7) Tenancy Contract
@@ -96,13 +102,13 @@ INSERT INTO person (first_name, last_name, address)
 VALUES ('Harry','Poter','Hamburg');
 
 -- 4) insert a lease contract
-INSERT INTO contract (contract_date, place, person_id, estate_id, agent_id)
-VALUES ('2025-04-22','Hamburg', 1, 2, 1);
+INSERT INTO contract (contract_date, place, person_id, estate_id)
+VALUES ('2025-04-22','Hamburg', 1, 2);
 INSERT INTO tenancy_contract (contract_no, start_date, duration_months, extra_costs)
 VALUES (currval('contract_contract_no_seq'), '2025-05-01', 12, 500);
 
 -- 5) insert a purchase contract
-INSERT INTO contract (contract_date, place, person_id, estate_id, agent_id)
-VALUES ('2025-04-22','Hamburg', 1, 1, 1);
+INSERT INTO contract (contract_date, place, person_id, estate_id)
+VALUES ('2025-04-22','Hamburg', 1, 1);
 INSERT INTO purchase_contract (contract_no, installments, interest_rate)
 VALUES (currval('contract_contract_no_seq'), 36, 3.5);
