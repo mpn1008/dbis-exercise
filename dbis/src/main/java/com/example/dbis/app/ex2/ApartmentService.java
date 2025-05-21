@@ -1,4 +1,4 @@
-package com.example.dbis.app;
+package com.example.dbis.app.ex2;
 
 import com.example.dbis.domain.model.Apartment;
 import com.example.dbis.domain.model.EstateAgent;

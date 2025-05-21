@@ -33,21 +33,41 @@ public class StdSchedule {
     Connection c1 = connectionFactory.newConnection();
     c1.setAutoCommit(false);
     //c1.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-    //c1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-    Connection c2 = connectionFactory.newConnection();
-    c2.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+    c1.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+    Connection c2 = connectionFactory.newConnection(); // DEfault = Read commited
+//    c2.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+    c2.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
     c2.setAutoCommit(false);
 
+//    List<RunnableOperation> operations = new ArrayList<>(Arrays.asList(
+//        new RunnableOperation(c2, 'r', "SELECT name FROM dissheet3 WHERE id = 1;"), // r2(x)
+//        new RunnableOperation(c1, 'w', "UPDATE dissheet3 SET name = 'A_T1' WHERE id = 1;"), // w1(x)
+//        new RunnableOperation(c1, 'w', "UPDATE dissheet3 SET name = 'B_T1' WHERE id = 2;"), // w1(y)
+//        new RunnableOperation(c1, 'c', "COMMIT;"), // c1
+//        new RunnableOperation(c2, 'r', "SELECT name FROM dissheet3 WHERE id = 2;"), // r2(y)
+//        new RunnableOperation(c2, 'w', "UPDATE dissheet3 SET name = 'A_T2' WHERE id = 1;"), // w2(x)
+//        new RunnableOperation(c2, 'w', "UPDATE dissheet3 SET name = 'B_T2' WHERE id = 2;"), // w2(y)
+//        new RunnableOperation(c2, 'c', "COMMIT;") // c2
+//    ));
+    //c)S3
     List<RunnableOperation> operations = new ArrayList<>(Arrays.asList(
-        new RunnableOperation(c2, 'r', "SELECT name FROM dissheet3 WHERE id = 1;"), // r2(x)
-        new RunnableOperation(c1, 'w', "UPDATE dissheet3 SET name = 'A_T1' WHERE id = 1;"), // w1(x)
-        new RunnableOperation(c1, 'w', "UPDATE dissheet3 SET name = 'B_T1' WHERE id = 2;"), // w1(y)
-        new RunnableOperation(c1, 'c', "COMMIT;"), // c1
-        new RunnableOperation(c2, 'r', "SELECT name FROM dissheet3 WHERE id = 2;"), // r2(y)
-        new RunnableOperation(c2, 'w', "UPDATE dissheet3 SET name = 'A_T2' WHERE id = 1;"), // w2(x)
-        new RunnableOperation(c2, 'w', "UPDATE dissheet3 SET name = 'B_T2' WHERE id = 2;"), // w2(y)
-        new RunnableOperation(c2, 'c', "COMMIT;") // c2
-    ));
+//        new RunnableOperation(c2, 'r', "SELECT * FROM dissheet3 WHERE id = 1 FOR SHARE;"),
+        new RunnableOperation(c2, 'r', "SELECT name FROM dissheet3 WHERE id = 1;"),
+
+//        new RunnableOperation(c1, 'r', "SELECT * FROM dissheet3 WHERE id = 1 FOR UPDATE;"),
+        new RunnableOperation(c1, 'w', "UPDATE dissheet3 SET name = name || ' + T1' WHERE id = 1;"),
+//        new RunnableOperation(c1, 'w', "SELECT * FROM dissheet3 WHERE id = 2 FOR UPDATE;"),
+        new RunnableOperation(c1, 'w', "UPDATE dissheet3 SET name = name || ' + T1' WHERE id = 2;"),
+        new RunnableOperation(c1, 'c', "COMMIT;"),
+
+//        new RunnableOperation(c2, 'r', "SELECT * FROM dissheet3 WHERE id = 2 FOR SHARE;"),
+        new RunnableOperation(c2, 'r', "SELECT name FROM dissheet3 WHERE id = 2;"),
+//        new RunnableOperation(c2, 'r', "SELECT * FROM dissheet3 WHERE id = 1 FOR UPDATE;"),
+        new RunnableOperation(c2, 'w', "UPDATE dissheet3 SET name = name || ' + T2' WHERE id = 1;"),
+//        new RunnableOperation(c2, 'r', "SELECT * FROM dissheet3 WHERE id = 2 FOR UPDATE;"),
+        new RunnableOperation(c2, 'w', "UPDATE dissheet3 SET name = name || ' + T2' WHERE id = 2;"),
+        new RunnableOperation(c2, 'c', "COMMIT;")));
+
 
     ExecutorService executor_t1 = Executors.newFixedThreadPool(1);
     ExecutorService executor_t2 = Executors.newFixedThreadPool(1);
@@ -59,7 +79,7 @@ public class StdSchedule {
       if (op.c == c2)
         executor_t2.execute(op);
 
-      Thread.sleep(250);  // Sleep, so the threads in both pools get executed in the desired order
+      Thread.sleep(1000);  // Sleep, so the threads in both pools get executed in the desired order
 
     }
     executor_t1.shutdown();
@@ -159,8 +179,8 @@ public class StdSchedule {
       this.c = connection;
     }
 
-    public void run(){
-      System.out.println(Thread.currentThread().getName()+"-sql = " + op);
+    public void run() {
+      System.out.println(Thread.currentThread().getName() + "-sql = " + op);
       Statement st;
       try {
         st = c.createStatement();

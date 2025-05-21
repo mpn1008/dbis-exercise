@@ -1,6 +1,6 @@
 package com.example.dbis.infra.controller;
 
-import com.example.dbis.app.EstateService;
+import com.example.dbis.app.ex2.EstateService;
 import com.example.dbis.app.ex3.StdSchedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

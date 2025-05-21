@@ -1,6 +1,5 @@
-package com.example.dbis.app;
+package com.example.dbis.app.ex2;
 
-import com.example.dbis.domain.model.Estate;
 import com.example.dbis.domain.model.EstateAgent;
 import com.example.dbis.infra.jpa.EstateAgentRepository;
 import jakarta.transaction.Transactional;
@@ -8,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 

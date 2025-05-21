@@ -1,4 +1,4 @@
-package com.example.dbis.app;
+package com.example.dbis.app.ex2;
 
 import lombok.Builder;
 import lombok.Data;

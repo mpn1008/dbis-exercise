@@ -1,4 +1,4 @@
-package com.example.dbis.app;
+package com.example.dbis.app.ex2;
 import com.example.dbis.domain.model.*;
 import com.example.dbis.infra.jpa.TenancyRepository;
 import com.example.dbis.infra.jpa.ContractRepository;
